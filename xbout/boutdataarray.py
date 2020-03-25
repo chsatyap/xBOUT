@@ -122,8 +122,8 @@ class BoutDataArrayAccessor:
         to the base coordinates by an angle zShift
         """
         if self.data.direction_y != "Standard":
-            raise ValueError("Cannot shift a " + self.direction_y + " type field to "
-                             + "field-aligned coordinates")
+            raise ValueError(f"Cannot shift a {self.data.direction_y} type field to "
+                             "field-aligned coordinates")
         result = self._shiftZ(self.data['zShift'])
         result.attrs["direction_y"] = "Aligned"
         return result
@@ -134,8 +134,8 @@ class BoutDataArrayAccessor:
         respect to the base coordinates by an angle zShift
         """
         if self.data.direction_y != "Aligned":
-            raise ValueError("Cannot shift a " + self.direction_y + " type field to "
-                             + "field-aligned coordinates")
+            raise ValueError(f"Cannot shift a {self.data.direction_y} type field from "
+                             "field-aligned coordinates")
         result = self._shiftZ(-self.data['zShift'])
         result.attrs["direction_y"] = "Standard"
         return result
