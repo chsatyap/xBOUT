@@ -125,7 +125,7 @@ class BoutDataArrayAccessor:
             raise ValueError("Cannot shift a " + self.direction_y + " type field to "
                              + "field-aligned coordinates")
         result = self._shiftZ(self.data['zShift'])
-        result["direction_y"] = "Aligned"
+        result.attrs["direction_y"] = "Aligned"
         return result
 
     def fromFieldAligned(self):
@@ -137,7 +137,7 @@ class BoutDataArrayAccessor:
             raise ValueError("Cannot shift a " + self.direction_y + " type field to "
                              + "field-aligned coordinates")
         result = self._shiftZ(-self.data['zShift'])
-        result["direction_y"] = "Standard"
+        result.attrs["direction_y"] = "Standard"
         return result
 
     def from_region(self, name, with_guards=None):
