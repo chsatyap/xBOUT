@@ -170,20 +170,29 @@ class BoutDataArrayAccessor:
                 myg = with_guards
 
         da = self.data.isel(region.get_slices())
-        da.attrs['region'] = region
 
-        if region.connection_inner_x is not None:
-            # get inner x-guard cells for da from the global array
-            da = _concat_inner_guards(da, self.data, mxg)
-        if region.connection_outer_x is not None:
-            # get outer x-guard cells for da from the global array
-            da = _concat_outer_guards(da, self.data, mxg)
-        if region.connection_lower_y is not None:
-            # get lower y-guard cells from the global array
-            da = _concat_lower_guards(da, self.data, mxg, myg)
-        if region.connection_upper_y is not None:
-            # get upper y-guard cells from the global array
-            da = _concat_upper_guards(da, self.data, mxg, myg)
+        # Make sure attrs are unique before we change them
+        da.attrs = copy(da.attrs)
+        # The returned da has only one region
+        single_region = deepcopy(region)
+        da.attrs['regions'] = {name: single_region}
+
+        # get inner x-guard cells for da from the global array
+        da = _concat_inner_guards(da, self.data, mxg)
+        # get outer x-guard cells for da from the global array
+        da = _concat_outer_guards(da, self.data, mxg)
+        # get lower y-guard cells from the global array
+        da = _concat_lower_guards(da, self.data, mxg, myg)
+        # get upper y-guard cells from the global array
+        da = _concat_upper_guards(da, self.data, mxg, myg)
+
+        # If the result (which only has a single region) is passed to from_region a
+        # second time, don't want to slice anything.
+        single_region = list(da.regions.values())[0]
+        single_region.xinner_ind = None
+        single_region.xouter_ind = None
+        single_region.ylower_ind = None
+        single_region.yupper_ind = None
 
         return da
 
@@ -239,11 +248,8 @@ class BoutDataArrayAccessor:
             #                                method=method).bout.to_dataset()]
             # )
 
-            # result has all regions, so should not have a region attribute
-            if 'region' in result.attrs:
-                del result.attrs['region']
-            if 'region' in result[self.data.name].attrs:
-                del result[self.data.name].attrs['region']
+            # result has all regions, so copy over complete 'regions'
+            result.attrs['regions'] = self.data.regions
 
             if return_dataset:
                 return result
