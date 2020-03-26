@@ -64,7 +64,7 @@ class BoutDataArrayAccessor:
 
         return ds
 
-    def _shiftZ(self, zShift):
+    def _shift_z(self, zShift):
         """
         Shift a DataArray in the periodic, toroidal direction using FFTs.
 
@@ -116,7 +116,7 @@ class BoutDataArrayAccessor:
         # data_shifted
         return self.data.copy(data=data_shifted)
 
-    def toFieldAligned(self):
+    def to_field_aligned(self):
         """
         Transform DataArray to field-aligned coordinates, which are shifted with respect
         to the base coordinates by an angle zShift
@@ -124,11 +124,11 @@ class BoutDataArrayAccessor:
         if self.data.direction_y != "Standard":
             raise ValueError(f"Cannot shift a {self.data.direction_y} type field to "
                              "field-aligned coordinates")
-        result = self._shiftZ(self.data['zShift'])
+        result = self._shift_z(self.data['zShift'])
         result.attrs["direction_y"] = "Aligned"
         return result
 
-    def fromFieldAligned(self):
+    def from_field_aligned(self):
         """
         Transform DataArray from field-aligned coordinates, which are shifted with
         respect to the base coordinates by an angle zShift
@@ -136,7 +136,7 @@ class BoutDataArrayAccessor:
         if self.data.direction_y != "Aligned":
             raise ValueError(f"Cannot shift a {self.data.direction_y} type field from "
                              "field-aligned coordinates")
-        result = self._shiftZ(-self.data['zShift'])
+        result = self._shift_z(-self.data['zShift'])
         result.attrs["direction_y"] = "Standard"
         return result
 
@@ -261,7 +261,7 @@ class BoutDataArrayAccessor:
 
         if zcoord in da.dims and da.direction_y != 'Aligned':
             aligned_input = False
-            da = da.bout.toFieldAligned()
+            da = da.bout.to_field_aligned()
         else:
             aligned_input = True
 
@@ -317,7 +317,7 @@ class BoutDataArrayAccessor:
 
         if not aligned_input:
             # Want output in non-aligned coordinates
-            da = da.bout.fromFieldAligned()
+            da = da.bout.from_field_aligned()
 
         if toroidal_points is not None and zcoord in da.sizes:
             if isinstance(toroidal_points, int):
