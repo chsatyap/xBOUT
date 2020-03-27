@@ -20,6 +20,7 @@ from dask.diagnostics import ProgressBar
 from .geometries import apply_geometry
 from .plotting.animate import animate_poloidal, animate_pcolormesh, animate_line
 from .plotting.utils import _create_norm
+from .utils import _add_cartesian_coordinates
 
 
 @xr.register_dataset_accessor('bout')
@@ -166,6 +167,9 @@ class BoutDatasetAccessor:
         # can continue without applying geometry here
 
         return ds
+
+    def add_cartesian_coordinates(self):
+        return _add_cartesian_coordinates(self.data)
 
     def remove_yboundaries(self):
         """

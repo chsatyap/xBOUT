@@ -13,7 +13,7 @@ from .plotting import plotfuncs
 from .plotting.utils import _create_norm
 from .region import (Region, _concat_inner_guards, _concat_outer_guards,
                      _concat_lower_guards, _concat_upper_guards)
-from .utils import _update_metadata_increased_resolution
+from .utils import _add_cartesian_coordinates, _update_metadata_increased_resolution
 
 
 @register_dataarray_accessor('bout')
@@ -334,6 +334,9 @@ class BoutDataArrayAccessor:
                 da = da.isel(**{zcoord: toroidal_points})
 
         return da
+
+    def add_cartesian_coordinates(self):
+        return _add_cartesian_coordinates(self.data)
 
     def remove_yboundaries(self, return_dataset=False):
         """
