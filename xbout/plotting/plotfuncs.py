@@ -282,7 +282,6 @@ def plot3d(da, style='surface', engine='k3d', **kwargs):
     if engine == 'k3d':
         import k3d
 
-        from matplotlib.tri import Triangulation
         plot = k3d.plot()
 
         for region_name, da_region in _decompose_regions(da).items():
