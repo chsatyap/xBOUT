@@ -242,6 +242,14 @@ def add_toroidal_geometry_coords(ds, *, coordinates=None, grid=None):
             ds = ds.set_coords('zShift')
         except ValueError:
             pass
+        try:
+            ds = ds.set_coords('zShift_CELL_XLOW')
+        except ValueError:
+            pass
+        try:
+            ds = ds.set_coords('zShift_CELL_YLOW')
+        except ValueError:
+            pass
 
     ds = _create_regions_toroidal(ds)
 
