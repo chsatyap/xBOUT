@@ -61,6 +61,7 @@ class BoutDataArrayAccessor:
                 del ds.attrs[name]
         dropIfExists(ds, 'direction_y')
         dropIfExists(ds, 'direction_z')
+        dropIfExists(ds, 'cell_location')
 
         return ds
 
