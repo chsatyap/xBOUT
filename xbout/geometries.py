@@ -240,7 +240,15 @@ def add_toroidal_geometry_coords(ds, *, coordinates=None, grid=None):
         # Add zShift as a coordinate, so that it gets interpolated along with a variable
         try:
             ds = ds.set_coords('zShift')
-        except KeyError:
+        except ValueError:
+            pass
+        try:
+            ds = ds.set_coords('zShift_CELL_XLOW')
+        except ValueError:
+            pass
+        try:
+            ds = ds.set_coords('zShift_CELL_YLOW')
+        except ValueError:
             pass
 
     ds = _create_regions_toroidal(ds)
