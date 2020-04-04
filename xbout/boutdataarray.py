@@ -377,7 +377,7 @@ class BoutDataArrayAccessor:
 
         return da
 
-    def remove_yboundaries(self, return_dataset=False):
+    def remove_yboundaries(self, return_dataset=False, remove_extra_upper=False):
         """
         Remove y-boundary points, if present, from the DataArray
 
@@ -407,7 +407,8 @@ class BoutDataArrayAccessor:
             if part_region.connection_lower_y is None:
                 part = part.isel({ycoord: slice(myg, None)})
             if part_region.connection_upper_y is None:
-                part = part.isel({ycoord: slice(-myg)})
+                part = part.isel({ycoord: slice(
+                    -myg if not remove_extra_upper else -myg-1)})
             parts.append(part.bout.to_dataset())
 
         result = xr.combine_by_coords(parts)
@@ -419,6 +420,14 @@ class BoutDataArrayAccessor:
         # result is as if we had not kept y-boundaries when loading
         result.metadata['keep_yboundaries'] = 0
         result[self.data.name].metadata['keep_yboundaries'] = 0
+
+        if remove_extra_upper:
+            # modify jyseps*, ny_inner, ny so that sliced variable gets consistent
+            # regions
+            result.metadata['ny_inner'] -= 1
+            result.metadata['jyseps1_2'] -= 1
+            result.metadata['jyseps2_2'] -= 1
+            result.metadata['ny'] -= 2
 
         # regions are not correct now that number of y-points has changed
         del result.attrs['regions']

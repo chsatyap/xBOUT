@@ -172,7 +172,7 @@ class BoutDatasetAccessor:
 
         return ds
 
-    def remove_yboundaries(self):
+    def remove_yboundaries(self, **kwargs):
         """
         Remove y-boundary points, if present, from the Dataset
         """
@@ -182,7 +182,8 @@ class BoutDatasetAccessor:
         ycoord = self.data.metadata['bout_ydim']
         for v in self.data:
             if xcoord in self.data[v].dims and ycoord in self.data[v].dims:
-                variables.append(self.data[v].bout.remove_yboundaries(return_dataset=True))
+                variables.append(self.data[v].bout.remove_yboundaries(return_dataset=True,
+                                                                      **kwargs))
             elif ycoord in self.data[v].dims:
                 raise ValueError(f'{v} only has a {ycoord}-dimension so cannot split '
                                   'into regions.')
@@ -195,6 +196,8 @@ class BoutDatasetAccessor:
 
         result = xr.merge(variables)
         result.attrs = self.data.attrs
+        # Copy metadata to get possibly modified jyseps*, ny_inner, ny
+        result.attrs['metadata'] = variables[0].metadata
 
         # call to re-create regions
         result = apply_geometry(result, self.data.geometry)
