@@ -463,31 +463,40 @@ class BoutDatasetAccessor:
              this_title, this_aspect) = subplot_args
 
             divider = make_axes_locatable(ax)
-            cax = divider.append_axes("right", size="5%", pad=0.1)
 
             ax.set_aspect(this_aspect)
 
             if isinstance(v, str):
                 v = self.data[v]
-
-            data = v.bout.data
-            ndims = len(data.dims)
-            ax.set_title(data.name)
+            
+            if isinstance(v, collections.Sequence):
+                ndims = 2
+                nt = v[0].sizes[animate_over]
+            else:
+                ndims = len(v.dims)
+                ax.set_title(v.name)
+                nt = v.sizes[animate_over]
+                if ndims == 2:
+                    v = [v]
 
             if ndims == 2:
-                blocks.append(animate_line(data=data, ax=ax, animate_over=animate_over,
-                                           animate=False, **kwargs))
+                for data in v:
+                    blocks.append(animate_line(data=data, ax=ax,
+                                               animate_over=animate_over,
+                                               animate=False, **kwargs))
             elif ndims == 3:
                 if this_vmin is None:
-                    this_vmin = data.min().values
+                    this_vmin = v.min().values
                 if this_vmax is None:
-                    this_vmax = data.max().values
+                    this_vmax = v.max().values
+
+                cax = divider.append_axes("right", size="5%", pad=0.1)
 
                 norm = _create_norm(this_logscale, kwargs.get('norm', None), this_vmin,
                                     this_vmax)
 
                 if this_poloidal_plot:
-                    var_blocks = animate_poloidal(data, ax=ax, cax=cax,
+                    var_blocks = animate_poloidal(v, ax=ax, cax=cax,
                                                   animate_over=animate_over,
                                                   animate=False, vmin=this_vmin,
                                                   vmax=this_vmax, norm=norm,
@@ -495,7 +504,7 @@ class BoutDatasetAccessor:
                     for block in var_blocks:
                         blocks.append(block)
                 else:
-                    blocks.append(animate_pcolormesh(data=data, ax=ax, cax=cax,
+                    blocks.append(animate_pcolormesh(data=v, ax=ax, cax=cax,
                                                      animate_over=animate_over,
                                                      animate=False, vmin=this_vmin,
                                                      vmax=this_vmax, norm=norm,
@@ -508,7 +517,7 @@ class BoutDatasetAccessor:
                 # Replace default title with user-specified one
                 ax.set_title(this_title)
 
-        timeline = amp.Timeline(np.arange(v.sizes[animate_over]), fps=fps)
+        timeline = amp.Timeline(np.arange(nt), fps=fps)
         anim = amp.Animation(blocks, timeline)
 
         if tight_layout:
