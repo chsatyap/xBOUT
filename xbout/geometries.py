@@ -94,24 +94,25 @@ def apply_geometry(ds, geometry_name, *, coordinates=None, grid=None):
         # add_geometry_coords, in which case we do not need this.
         nx = updated_ds.dims[xcoord]
         updated_ds = updated_ds.assign_coords(**{xcoord: np.arange(nx)})
-    ny = updated_ds.dims[ycoord]
-    # dy should always be constant in x, so it is safe to slice to x=0.
-    # [The y-coordinate has to be a 1d coordinate that labels x-z slices of the grid
-    # (similarly x-coordinate is 1d coordinate that labels y-z slices and
-    # z-coordinate is a 1d coordinate that labels x-y slices). A coordinate might
-    # have different values in disconnected regions, but there are no branch-cuts
-    # allowed in the x-direction in BOUT++ (at least for the momement), so the
-    # y-coordinate has to be 1d and single-valued. Therefore similarly dy has to be
-    # 1d and single-valued.] Need drop=True so that the result does not have an
-    # x-coordinate value which prevents it being added as a coordinate.
-    dy = updated_ds['dy'].isel({xcoord: 0}, drop=True)
+    if ycoord not in ds.coords:
+        ny = updated_ds.dims[ycoord]
+        # dy should always be constant in x, so it is safe to slice to x=0.
+        # [The y-coordinate has to be a 1d coordinate that labels x-z slices of the grid
+        # (similarly x-coordinate is 1d coordinate that labels y-z slices and
+        # z-coordinate is a 1d coordinate that labels x-y slices). A coordinate might
+        # have different values in disconnected regions, but there are no branch-cuts
+        # allowed in the x-direction in BOUT++ (at least for the momement), so the
+        # y-coordinate has to be 1d and single-valued. Therefore similarly dy has to be
+        # 1d and single-valued.] Need drop=True so that the result does not have an
+        # x-coordinate value which prevents it being added as a coordinate.
+        dy = updated_ds['dy'].isel({xcoord: 0}, drop=True)
 
-    # calculate ycoord at the centre of each cell
-    y = dy.cumsum(keep_attrs=True) - dy/2.
-    updated_ds = updated_ds.assign_coords(**{ycoord: y.values})
+        # calculate ycoord at the centre of each cell
+        y = dy.cumsum(keep_attrs=True) - dy/2.
+        updated_ds = updated_ds.assign_coords(**{ycoord: y.values})
 
     # If full data (not just grid file) then toroidal dim will be present
-    if zcoord in updated_ds.dims:
+    if zcoord in updated_ds.dims and zcoord not in updated_ds.coords:
         nz = updated_ds.dims[zcoord]
         z0 = 2*np.pi*updated_ds.metadata['ZMIN']
         z1 = z0 + nz*updated_ds.metadata['dz']
